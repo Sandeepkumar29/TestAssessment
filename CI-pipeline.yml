@@ -4,7 +4,7 @@ name: '$(Build.BuildId)'
 trigger:
   branches:
     include:
-	- "master"
+    - "master"
 pr: none
 
 
@@ -134,7 +134,7 @@ stages:
       displayName: 'Execute QAA test catagories'
       inputs:
         testSelector: 'testAssemblies'
-        testAssemblyVer2: *.dll'
+        testAssemblyVer2: '*.dll'
         searchFolder: ''
         resultsFolder: 'TestResults'
         testFiltercriteria: ''
