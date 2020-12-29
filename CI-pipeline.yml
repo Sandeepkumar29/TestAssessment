@@ -1,0 +1,162 @@
+# Build pipeline.
+name: '$(Build.BuildId)'
+
+trigger:
+  branches:
+    include:
+	- "master"
+pr: none
+
+
+variables:
+# variable groups
+
+# pipeline variables
+
+stages:
+- stage: Build
+  condition: #if any
+  jobs:
+#--- Job1 - Build Project1
+  - job: Job1_Build_Project1
+    
+    pool:
+      name: Hosted 2017 # of whichever pool required
+   
+    steps:
+    - checkout: self #name of the pool can be MS-Hosted/Self-Hosted
+
+	# Build the solution
+    - task: VSBuild@1
+      displayName: 'Build Solution'
+      inputs:
+        solution: ''
+        vsVersion: ''
+        platform: ''
+        configuration: ''
+        
+	# Copy the required files to artifact staging directory
+    - task: CopyFiles@2
+      displayName: 'Copy files'
+      inputs:
+        SourceFolder: ''
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: BuildArtifact1
+
+#--- Job2 - Build Project2
+  - job: Job1_Build_Project2
+    
+    pool:
+      name: Hosted 2017 # of whichever pool required
+   
+    steps:
+    - checkout: self #name of the pool can be MS-Hosted/Self-Hosted
+
+	# Build the solution
+    - task: VSBuild@1
+      displayName: 'Build Solution'
+      inputs:
+        solution: ''
+        vsVersion: ''
+        platform: ''
+        configuration: ''
+        
+	# Copy the required files to artifact staging directory
+    - task: CopyFiles@2
+      displayName: 'Copy files'
+      inputs:
+        SourceFolder: ''
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: BuildArtifact2
+		
+#--- Job3 - Build Tes Project
+  - job: Job1_Build_Test_Project
+    
+    pool:
+      name: Hosted 2017 # of whichever pool required
+   
+    steps:
+    - checkout: self 
+
+	# Build the solution
+    - task: VSBuild@1
+      displayName: 'Build Solution'
+      inputs:
+        solution: ''
+        vsVersion: ''
+        platform: ''
+        configuration: ''
+        
+	# Copy the required files to artifact staging directory
+    - task: CopyFiles@2
+      displayName: 'Copy files'
+      inputs:
+        SourceFolder: ''
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: TestBianries
+
+- stage: SmokeTest
+  dependsOn: Build
+  condition: #if any
+  jobs:
+#--- Job1 - Smoke Test Execution---#
+  - job: Job1_Smoke_Test_Execution
+    pool:
+      name: VS2017 #name of the pool can be MS-Hosted/Self-Hosted
+
+    steps:
+    - checkout: none 
+
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download artifact'
+      inputs:
+        buildType: 'current'
+        artifactName: 'TestBianries'
+        targetPath: '$(System.DefaultWorkingDirectory)'
+
+
+    - task: VSTest@2
+      displayName: 'Execute QAA test catagories'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: *.dll'
+        searchFolder: ''
+        resultsFolder: 'TestResults'
+        testFiltercriteria: ''
+        uiTests: true
+        vstestLocationMethod: 'location'
+        vstestLocation: ''
+        pathtoCustomTestAdapters: ''
+        failOnMinTestsNotRun: false
+        diagnosticsEnabled: true
+        rerunFailedTests: true
+        rerunFailedThreshold: '10'
+      continueOnError: True
+
+	# Copy the required logs to artifact staging directory
+    - task: CopyFiles@2
+      displayName: 'Copy logs'
+      inputs:
+        SourceFolder: ''
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish Logs'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)'
+        artifact: TestLogs
