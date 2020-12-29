@@ -22,30 +22,30 @@ stages:
         deploy:
           steps:
           - task: DownloadPipelineArtifact@2
-			displayName: 'Download required artifact'
-			inputs:
-			  buildType: specific
-			  project: ''
-			  definition: ''
-			  buildVersionToDownload: specific
-			  pipelineId: ''
-			  artifactName: 'BuildArtifact1'
-			  itemPattern: '*.zip'
-			  targetPath: '$(System.DefaultWorkingDirectory)'
+	    displayName: 'Download required artifact'
+	    inputs:
+	      buildType: specific
+	      project: ''
+	      definition: ''
+	      buildVersionToDownload: specific
+	      pipelineId: ''
+	      artifactName: 'BuildArtifact1'
+	      itemPattern: '*.zip'
+	      targetPath: '$(System.DefaultWorkingDirectory)'
 
-		  - task: AzureWebApp@1
-		    displayName: 'Deploy to offline slot'
-		    inputs:
-		      azureSubscription: ''
-		      appType: ''
-		      appName: ''
-		      deployToSlotOrASE: 
-		      resourceGroupName: ''
-		      slotName: ''
-		      package: '$(System.DefaultWorkingDirectory)\*.zip'
-		      deploymentMethod: 'zipDeploy'
+	  - task: AzureWebApp@1
+	    displayName: 'Deploy to offline slot'
+	    inputs:
+	      azureSubscription: ''
+	      appType: ''
+	      appName: ''
+	      deployToSlotOrASE: 
+	      resourceGroupName: ''
+	      slotName: ''
+	      package: '$(System.DefaultWorkingDirectory)\*.zip'
+	      deploymentMethod: 'zipDeploy'
           
-		  # Add some tasks to verify the delployment anf then swap using the below task to the main slot
+	  # Add some tasks to verify the delployment anf then swap using the below task to the main slot
           - task: AzureAppServiceManage@0
             displayName: 'Swap Offline with $(_prodSlot) Channel'
             condition:  #Add the required condition here
